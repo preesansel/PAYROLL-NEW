@@ -1,0 +1,47 @@
+package com.payroll.mock;
+
+
+
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+
+@Configuration
+public class MockServerConfig {
+
+    @Bean
+    public WireMockServer mockEmployeeService() {
+        WireMockServer wireMockServer = new WireMockServer(8081);
+        wireMockServer.stubFor(get(urlEqualTo("/employees"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"empId\": 1}, {\"empId\": 2}]")));
+        wireMockServer.start();
+        return wireMockServer;
+    }
+
+    @Bean
+    public WireMockServer mockSalaryService() {
+        WireMockServer wireMockServer = new WireMockServer(8082);
+        wireMockServer.stubFor(get(urlMatching("/salary.*"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"basicPay\": 50000, \"houseRentAllowance\": 15000, \"specialAllowance\": 5000, \"providentFund\": 6000}")));
+        wireMockServer.start();
+        return wireMockServer;
+    }
+
+    @Bean
+    public WireMockServer mockTaxService() {
+        WireMockServer wireMockServer = new WireMockServer(8083);
+        wireMockServer.stubFor(post(urlEqualTo("/tax/calculate"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"incomeTax\": 5000, \"professionalTax\": 200}")));
+        wireMockServer.start();
+        return wireMockServer;
+    }
+}
